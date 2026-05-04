@@ -3,8 +3,9 @@ import mongoose, { Schema, Document as MongoDoc, Model } from 'mongoose'
 export type DocType = 'notes' | 'pyq' | 'syllabus'
 
 export interface IDocument extends MongoDoc {
-  userId:           mongoose.Types.ObjectId
-  examId:           mongoose.Types.ObjectId
+  _id: mongoose.Types.ObjectId
+  userId:           string
+  examId:           string
   subject:          string
   type:             DocType
   originalName:     string
@@ -16,8 +17,8 @@ export interface IDocument extends MongoDoc {
 }
 
 const DocumentSchema = new Schema<IDocument>({
-  userId:           { type: Schema.Types.ObjectId, ref: 'User',  required: true, index: true },
-  examId:           { type: Schema.Types.ObjectId, ref: 'Exam',  required: true, index: true },
+  userId:           { type: String, required: true, index: true },
+  examId:           { type: String, required: true, index: true },
   subject:          { type: String, required: true },
   type:             { type: String, enum: ['notes','pyq','syllabus'], required: true },
   originalName:     { type: String, required: true },

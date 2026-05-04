@@ -1,0 +1,13 @@
+# User uploaded files
+uploads/
+
+# Local vector database
+chroma-data/
+
+# Environment variables
+.env.local
+.env*.local
+
+# OS files
+.DS_Store
+Thumbs.db
