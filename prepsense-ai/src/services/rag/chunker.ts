@@ -15,48 +15,39 @@ export function chunkText(rawText: string): TextChunk[] {
     .replace(/[ \t]+/g, ' ')        // collapse spaces
     .trim()
 
-  // Step 2 — split into paragraphs first (semantic boundaries)
+  // Step 2 — split into sentences/paragraphs for better chunking
   const paragraphs = cleaned
     .split(/\n\n+/)
     .map(p => p.trim())
     .filter(p => p.length > 30)    // discard tiny fragments
 
-  // Step 3 — group paragraphs into chunks of ~CHUNK_SIZE words
+  // Step 3 — convert to words for more precise chunking
+  const words = paragraphs.flatMap(p => p.split(/\s+/))
+  
+  // Step 4 — create chunks with proper indexing and overlap
   const chunks: TextChunk[] = []
-  let currentChunk: string[] = []
-  let currentWordCount = 0
   let chunkIndex = 0
-
-  for (const paragraph of paragraphs) {
-    const words = paragraph.split(/\s+/)
-    const wordCount = words.length
-
-    // If adding this paragraph exceeds chunk size, save current chunk
-    if (currentWordCount + wordCount > CHUNK_SIZE && currentChunk.length > 0) {
-      chunks.push({
-        text: currentChunk.join('\n\n'),
-        chunkIndex,
-        wordCount: currentWordCount,
-      })
-      chunkIndex++
-
-      // Keep last few words as overlap for context continuity
-      const overlapText = currentChunk[currentChunk.length - 1] ?? ''
-      const overlapWords = overlapText.split(/\s+/).slice(-CHUNK_OVERLAP)
-      currentChunk = overlapWords.length > 0 ? [overlapWords.join(' ')] : []
-      currentWordCount = overlapWords.length
-    }
-
-    currentChunk.push(paragraph)
-    currentWordCount += wordCount
+  
+  for (let i = 0; i < words.length; i += (CHUNK_SIZE - CHUNK_OVERLAP)) {
+    const chunkWords = words.slice(i, i + CHUNK_SIZE)
+    
+    if (chunkWords.length < 20) break // Skip if chunk too small
+    
+    chunks.push({
+      text: chunkWords.join(' '),
+      chunkIndex,
+      wordCount: chunkWords.length,
+    })
+    
+    chunkIndex++
   }
 
-  // Save the last chunk
-  if (currentChunk.length > 0 && currentWordCount > 20) {
+  // Ensure at least one chunk exists
+  if (chunks.length === 0 && words.length > 0) {
     chunks.push({
-      text: currentChunk.join('\n\n'),
-      chunkIndex,
-      wordCount: currentWordCount,
+      text: words.join(' '),
+      chunkIndex: 0,
+      wordCount: words.length,
     })
   }
 

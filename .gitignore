@@ -11,3 +11,5 @@ chroma-data/
 # OS files
 .DS_Store
 Thumbs.db
+
+UPLOAD_DEBUG_GUIDE.md

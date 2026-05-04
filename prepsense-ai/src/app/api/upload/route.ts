@@ -84,12 +84,17 @@ export async function POST(req: NextRequest) {
     
         // Step 1 — Parse
     const parsed = await parseFile(filePath)
-console.log(`✓ Parsed: ${parsed.pageCount} pages, ${parsed.text.length} chars`)
-console.log(`Preview: "${parsed.text.substring(0, 300)}"`)
+    console.log(`✓ Parsed: ${parsed.pageCount} pages, ${parsed.text.length} chars`)
+    console.log(`✓ Images detected: ${parsed.imageCount || 0}`)
+    console.log(`Preview: "${parsed.text.substring(0, 300)}"`)
 
     // Step 2 — Chunk
     const chunks = chunkText(parsed.text)
     console.log(`✓ Chunked: ${chunks.length} chunks`)
+    console.log(`Chunk indices: ${chunks.map(c => c.chunkIndex).join(', ')}`)
+    chunks.forEach((chunk, idx) => {
+      console.log(`  Chunk ${idx}: index=${chunk.chunkIndex}, words=${chunk.wordCount}, preview="${chunk.text.substring(0, 50)}..."`)
+    })
 
     // Step 3 — Embed
     const embedded = await embedChunks(chunks)
